@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DeatzNatz — Roblox Scripter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #000;
+      --bg2:     #0a0a0a;
+      --border:  rgba(255,255,255,0.09);
+      --muted:   #444;
+      --dim:     #888;
+      --text:    #ccc;
+      --white:   #fff;
+      --sidebar: 220px;
+      --mono:    'IBM Plex Mono', monospace;
+      --display: 'Anton', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 2px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--muted); }
+
+    #sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 28px;
+      z-index: 100;
+      background: var(--bg);
+    }
+
+    .sidebar-logo {
+      font-family: var(--display);
+      font-size: 28px;
+      letter-spacing: 0.02em;
+      color: var(--white);
+      line-height: 1;
+      text-decoration: none;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .sidebar-logo .dim { color: var(--muted); display: block; }
+
+    .sidebar-rule {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 28px 0;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 7px 0;
+      border-bottom: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .sidebar-nav a .num {
+      font-size: 9px;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active { color: var(--white); }
+    .sidebar-nav a:hover .num,
+    .sidebar-nav a.active .num { color: var(--dim); }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      line-height: 1.9;
+    }
+    .sidebar-footer span { display: block; }
+
+    #main {
+      margin-left: var(--sidebar);
+      flex: 1;
+      min-width: 0;
+    }
+
+
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 60px 60px 60px 60px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-index {
+      position: absolute;
+      top: 44px; right: 60px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .hero-ticker {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 36px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .hero-ticker-inner {
+      display: flex;
+      gap: 48px;
+      white-space: nowrap;
+      animation: ticker 18s linear infinite;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hero-ticker-inner span { flex-shrink: 0; }
+    @keyframes ticker {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .hero-name {
+      font-family: var(--display);
+      font-size: clamp(96px, 16vw, 200px);
+      line-height: 0.88;
+      letter-spacing: 0.01em;
+      color: var(--white);
+      margin-top: auto;
+      margin-bottom: 0;
+      animation: riseIn 0.9s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .hero-name .offset {
+      display: block;
+      padding-left: clamp(40px, 6vw, 100px);
+      color: var(--muted);
+    }
+
+    .hero-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-top: 40px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      animation: riseIn 0.9s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .hero-desc {
+      max-width: 360px;
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.8;
+    }
+    .hero-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 24px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 1px;
+      transition: all 0.18s;
+    }
+    .btn-primary { background: var(--white); color: #000; }
+    .btn-primary:hover { background: #ddd; transform: translateX(-3px); }
+    .btn-ghost { border: 1px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: var(--white); transform: translateX(-3px); }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      padding: 32px 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-header .s-num {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      min-width: 24px;
+    }
+    .section-header h2 {
+      font-family: var(--display);
+      font-size: clamp(32px, 5vw, 56px);
+      letter-spacing: 0.02em;
+      color: var(--white);
+      line-height: 1;
+    }
+    .section-header .s-desc {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+      max-width: 200px;
+      line-height: 1.6;
+    }
+
+    #about { border-bottom: 1px solid var(--border); }
+    .about-body {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      gap: 0;
+    }
+    .about-bio {
+      padding: 52px 60px;
+      font-size: 13px;
+      color: var(--dim);
+      line-height: 2;
+    }
+    .about-bio p + p { margin-top: 16px; }
+    .about-vr { background: var(--border); }
+    .about-stats {
+      padding: 52px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .stat-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row:hover { padding-left: 8px; }
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .stat-val {
+      font-family: var(--display);
+      font-size: 32px;
+      color: var(--white);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    #skills { border-bottom: 1px solid var(--border); }
+    .skills-table { width: 100%; border-collapse: collapse; }
+    .skills-table thead tr {
+      border-bottom: 1px solid var(--border);
+    }
+    .skills-table thead th {
+      padding: 14px 60px;
+      text-align: left;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .skills-table thead th:last-child { text-align: right; }
+    .skills-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.18s;
+    }
+    .skills-table tbody tr:last-child { border-bottom: none; }
+    .skills-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+    .skills-table td {
+      padding: 36px 60px;
+      vertical-align: top;
+    }
+    .skill-title {
+      font-family: var(--display);
+      font-size: 36px;
+      color: var(--white);
+      letter-spacing: 0.02em;
+      line-height: 1;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .skill-yrs {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+    .skill-body {
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.8;
+      max-width: 380px;
+    }
+    .skill-tags-cell {
+      text-align: right;
+    }
+    .skill-tags-cell .tag {
+      display: inline-block;
+      font-size: 9px;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin: 2px 0 2px 4px;
+      border-radius: 1px;
+    }
+
+    #projects { border-bottom: 1px solid var(--border); }
+    .project-row {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      gap: 0 32px;
+      align-items: start;
+      padding: 40px 60px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.18s, padding-left 0.2s;
+      cursor: default;
+    }
+    .project-row:last-child { border-bottom: none; }
+    .project-row:hover {
+      background: rgba(255,255,255,0.025);
+      padding-left: 72px;
+    }
+    .proj-num {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      padding-top: 6px;
+    }
+    .proj-body {}
+    .proj-title {
+      font-family: var(--display);
+      font-size: clamp(22px, 3vw, 34px);
+      color: var(--white);
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .proj-desc {
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.8;
+      max-width: 520px;
+      margin-bottom: 14px;
+    }
+    .proj-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .proj-tags .tag {
+      font-size: 9px;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: 1px;
+    }
+    .proj-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding-top: 6px;
+      white-space: nowrap;
+      transition: gap 0.18s;
+    }
+    .proj-link:hover { gap: 10px; }
+
+    #contact {}
+    .contact-body {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+    }
+    .contact-left {
+      padding: 72px 60px;
+      border-right: 1px solid var(--border);
+    }
+    .contact-left h3 {
+      font-family: var(--display);
+      font-size: clamp(36px, 5vw, 64px);
+      color: var(--white);
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+      margin-bottom: 24px;
+    }
+    .contact-left p {
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.9;
+      max-width: 320px;
+      margin-bottom: 36px;
+    }
+    .contact-vr { background: var(--border); }
+    .contact-right {
+      padding: 72px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+    }
+    .contact-link-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: padding-left 0.2s;
+    }
+    .contact-link-row:last-child { border-bottom: none; }
+    .contact-link-row:hover { padding-left: 12px; }
+    .contact-link-row .cl-name {
+      font-family: var(--display);
+      font-size: 22px;
+      color: var(--white);
+      letter-spacing: 0.02em;
+    }
+    .contact-link-row .cl-arrow {
+      font-size: 13px;
+      color: var(--muted);
+      transition: color 0.2s, transform 0.2s;
+    }
+    .contact-link-row:hover .cl-arrow {
+      color: var(--white);
+      transform: translateX(4px);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 860px) {
+      :root { --sidebar: 0px; }
+      #sidebar { display: none; }
+      #main { margin-left: 0; }
+      .section-header, .skills-table thead th, .skills-table td,
+      .project-row, .about-bio, .about-stats,
+      .contact-left, .contact-right, footer { padding-left: 24px; padding-right: 24px; }
+      .about-body, .contact-body { grid-template-columns: 1fr; }
+      .about-vr, .contact-vr { display: none; }
+      .skills-table thead th:last-child, .skill-tags-cell { text-align: left; }
+      .project-row { grid-template-columns: 32px 1fr; }
+      .proj-link { display: none; }
+      #hero { padding: 60px 24px 40px; }
+      .hero-index { right: 24px; }
+      .hero-bottom { flex-direction: column; align-items: flex-start; gap: 24px; }
+      .hero-cta { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside id="sidebar">
+    <a href="#hero" class="sidebar-logo">DEATZ<span class="dim">NATZ</span></a>
+    <div class="sidebar-rule"></div>
+    <ul class="sidebar-nav">
+      <li><a href="#about"><span class="num">01</span> About</a></li>
+      <li><a href="#skills"><span class="num">02</span> Skills</a></li>
+      <li><a href="#projects"><span class="num">03</span> Projects</a></li>
+      <li><a href="#contact"><span class="num">04</span> Contact</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <span>Roblox Scripter</span>
+      <span>Open for Hire</span>
+    </div>
+  </aside>
+
+  <main id="main">
+
+    <section id="hero">
+      <div class="hero-ticker">
+        <div class="hero-ticker-inner">
+          <span>Luau · OOP · Metatables · DataStore · RemoteEvents · Scripting · Building · Modeling · 3 Years · Open for Hire</span>
+          <span>Luau · OOP · Metatables · DataStore · RemoteEvents · Scripting · Building · Modeling · 3 Years · Open for Hire</span>
+          <span>Luau · OOP · Metatables · DataStore · RemoteEvents · Scripting · Building · Modeling · 3 Years · Open for Hire</span>
+        </div>
+      </div>
+      <div class="hero-index">Roblox Scripter — 2025</div>
+      <h1 class="hero-name">
+        DEATZ
+        <span class="offset">NATZ</span>
+      </h1>
+      <div class="hero-bottom">
+        <p class="hero-desc">
+          Building smooth, efficient Lua systems for Roblox games —
+          from combat mechanics to data persistence.
+          Clean code, zero spaghetti.
+        </p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn btn-primary">View Projects →</a>
+          <a href="#contact" class="btn btn-ghost">Hire Me</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="section-header reveal">
+        <span class="s-num">01</span>
+        <h2>ABOUT</h2>
+        <span class="s-desc">Who I am &amp;<br>what I do</span>
+      </div>
+      <div class="about-body">
+        <div class="about-bio reveal">
+          <p>Hey, I'm DeatzNatz — a Roblox developer who primarily focuses on scripting. I've been building on the platform for 3 years and love turning game ideas into polished, functional systems.</p>
+          <p>While I can also build and model, scripting is my main craft. I write clean, organised Luau code and care a lot about making things feel good to play.</p>
+        </div>
+        <div class="about-vr"></div>
+        <div class="about-stats reveal">
+          <div class="stat-row">
+            <span class="stat-label">Scripting Experience</span>
+            <span class="stat-val">3YR</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Building Experience</span>
+            <span class="stat-val">3YR</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Modeling Experience</span>
+            <span class="stat-val">3YR</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Status</span>
+            <span class="stat-val">OPEN</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="section-header reveal">
+        <span class="s-num">02</span>
+        <h2>SKILLS</h2>
+        <span class="s-desc">What I bring<br>to your game</span>
+      </div>
+      <table class="skills-table">
+        <thead>
+          <tr>
+            <th style="padding-left:60px">Skill</th>
+            <th>Description</th>
+            <th style="padding-right:60px">Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="reveal">
+            <td>
+              <span class="skill-title">SCRIPTING</span>
+              <span class="skill-yrs">3 years</span>
+            </td>
+            <td>
+              <p class="skill-body">3 years writing Luau for Roblox — server scripts, client scripts, and ModuleScripts with clean architecture. Proficient in OOP and metatables to build reusable, scalable systems. Comfortable with RemoteEvents, BindableEvents, DataStoreService, and more.</p>
+            </td>
+            <td class="skill-tags-cell">
+              <span class="tag">Luau</span>
+              <span class="tag">OOP</span>
+              <span class="tag">Metatables</span>
+              <span class="tag">DataStore</span>
+              <span class="tag">Remotes</span>
+            </td>
+          </tr>
+          <tr class="reveal">
+            <td>
+              <span class="skill-title">BUILDING</span>
+              <span class="skill-yrs">3 years</span>
+            </td>
+            <td>
+              <p class="skill-body">3 years constructing Roblox environments in Studio. Solid grasp of level layouts, props, terrain, and functional game spaces that look and feel good to explore.</p>
+            </td>
+            <td class="skill-tags-cell">
+              <span class="tag">Studio</span>
+              <span class="tag">Level Design</span>
+              <span class="tag">Terrain</span>
+            </td>
+          </tr>
+          <tr class="reveal">
+            <td>
+              <span class="skill-title">MODELING</span>
+              <span class="skill-yrs">3 years</span>
+            </td>
+            <td>
+              <p class="skill-body">3 years creating custom 3D assets for Roblox — characters, props, and environment pieces. Blender workflow with clean topology and proper import settings.</p>
+            </td>
+            <td class="skill-tags-cell">
+              <span class="tag">Blender</span>
+              <span class="tag">3D Modeling</span>
+              <span class="tag">Custom Assets</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="projects">
+      <div class="section-header reveal">
+        <span class="s-num">03</span>
+        <h2>PROJECTS</h2>
+        <span class="s-desc">Things I've<br>shipped</span>
+      </div>
+      <div class="project-row reveal">
+        <span class="proj-num">01</span>
+        <div class="proj-body">
+          <div class="proj-title">Project Name Here</div>
+          <p class="proj-desc">Brief description of what you scripted in this game — mechanics, systems, features. Replace this with your real project info.</p>
+          <div class="proj-tags">
+            <span class="tag">Combat</span>
+            <span class="tag">DataStore</span>
+            <span class="tag">Remotes</span>
+          </div>
+        </div>
+        <a href="#" class="proj-link">View →</a>
+      </div>
+      <div class="project-row reveal">
+        <span class="proj-num">02</span>
+        <div class="proj-body">
+          <div class="proj-title">Project Name Here</div>
+          <p class="proj-desc">Brief description of what you scripted in this game — mechanics, systems, features. Replace this with your real project info.</p>
+          <div class="proj-tags">
+            <span class="tag">UI</span>
+            <span class="tag">TweenService</span>
+            <span class="tag">Shop</span>
+          </div>
+        </div>
+        <a href="#" class="proj-link">View →</a>
+      </div>
+      <div class="project-row reveal">
+        <span class="proj-num">03</span>
+        <div class="proj-body">
+          <div class="proj-title">Project Name Here</div>
+          <p class="proj-desc">Brief description of what you scripted in this game — mechanics, systems, features. Replace this with your real project info.</p>
+          <div class="proj-tags">
+            <span class="tag">RPG</span>
+            <span class="tag">OOP</span>
+            <span class="tag">Metatables</span>
+          </div>
+        </div>
+        <a href="#" class="proj-link">View →</a>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-header reveal">
+        <span class="s-num">04</span>
+        <h2>CONTACT</h2>
+        <span class="s-desc">Let's work<br>together</span>
+      </div>
+      <div class="contact-body">
+        <div class="contact-left reveal">
+          <h3>LET'S<br>BUILD<br>SOMETHING.</h3>
+          <p>Looking to hire a scripter for your Roblox game? I'm available for freelance work and team projects. Reach out on any of the platforms below.</p>
+          <a href="#contact" class="btn btn-primary">Get in Touch →</a>
+        </div>
+        <div class="contact-vr"></div>
+        <div class="contact-right reveal">
+          <a href="https://www.roblox.com/users/search?keyword=DeatzNatz" target="_blank" class="contact-link-row">
+            <span class="cl-name">ROBLOX</span>
+            <span class="cl-arrow">→</span>
+          </a>
+          <a href="#" class="contact-link-row">
+            <span class="cl-name">DISCORD</span>
+            <span class="cl-arrow">→</span>
+          </a>
+          <a href="#" class="contact-link-row">
+            <span class="cl-name">TWITTER / X</span>
+            <span class="cl-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2025 DeatzNatz</span>
+      <span>Roblox Scripter · Open for Hire</span>
+    </footer>
+
+  </main>
+
+  <script>
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    reveals.forEach(el => obs.observe(el));
+
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.sidebar-nav a');
+    const onScroll = () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 160) current = s.id;
+      });
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+  </script>
+</body>
+</html>
